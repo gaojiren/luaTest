@@ -138,11 +138,11 @@ print("********print table***********")
 -- local myDump = myTable.dump()
 -- table.log(myTable.dump())
 
--- 需要处理unwatch
-binding.Off(myTable, "c.x.p", tag_cxp)
-binding.Off(myTable, "c", tag_cxp)
-binding.Off(myTable, "*", tag)
-myTable.c.x.p.w = -9999
+-- 需要处理Off时，参数对象为function
+-- binding.Off(myTable, "c.x.p", tag_cxp)
+-- binding.Off(myTable, "c", tag_cxp)
+-- binding.Off(myTable, "*", tag)
+-- myTable.c.x.p.w = -9999
 
 -- binding.watch(
 --     myTable,

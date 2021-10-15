@@ -49,6 +49,19 @@ local function choose(tb, func)
     return choose
 end
 
+function table.indexOf(list, target, from, useMaxN)
+    local len = useMaxN or #list
+    if from == nil then
+        from = 1
+    end
+    for i = from, len do
+        if list[i] == target then
+            return i
+        end
+    end
+    return -1
+end
+
 function format4reading(tableOrNot)
     if type(tableOrNot) == "table" and getmetatable(tableOrNot) then
         return tableOrNot.dump()
@@ -83,8 +96,7 @@ function notify(mt, key, v_old, v_new, needFilter)
     if not binds then
         return
     end
-    local maxn = mt.maxn____[key]
-    for i = 1, maxn do
+    for i = 1, #binds do
         local v = binds[i]
         if type(v) == "function" then
             v_new = filter(v_old, v_new, needFilter)
@@ -203,43 +215,38 @@ function binding.bindable(init, parentkey, parent)
     return t
 end
 
-function binding.On(table, key, func)
+function binding.On(t, key, func)
     local firstAccessKey = string.match(key, "(%a*)%.")
     -- print(firstAccessKey)
-    if firstAccessKey and type(table[firstAccessKey]) == "table" then
+    if firstAccessKey and type(t[firstAccessKey]) == "table" then
         -- local secondAccessKey = string.match(key, "%a*%.(%a*)%.*")
         local remainAccesskeys = string.match(key, "%a*%.(.*)")
         -- print(secondAccessKey)
-        return binding.On(table[firstAccessKey], remainAccesskeys, func)
+        return binding.On(t[firstAccessKey], remainAccesskeys, func)
     end
 
-    local binds = table.bind____
-    local maxns = table.maxn____
+    local binds = t.bind____
     if not binds[key] then
         binds[key] = {}
-        maxns[key] = 0
     end
     local bind = binds[key]
-    local tag = #bind + 1
-    bind[tag] = func
-    if tag > maxns[key] then
-        maxns[key] = tag
-    end
-    return tag
+    table.insert(bind, func)
 end
 
-function binding.Off(table, key, tag)
+function binding.Off(t, key, func)
     local firstAccessKey = string.match(key, "(%a*)%.")
     -- print(firstAccessKey)
-    if firstAccessKey and type(table[firstAccessKey]) == "table" then
+    if firstAccessKey and type(t[firstAccessKey]) == "table" then
         local remainAccesskeys = string.match(key, "%a*%.(.*)")
-        binding.Off(table[firstAccessKey], remainAccesskeys, tag)
+        binding.Off(t[firstAccessKey], remainAccesskeys, func)
         return
     end
 
-    local binds = table.bind____
+    local binds = t.bind____
     if binds[key] then
-        binds[key][tag] = nil   
+        local bind = binds[key]
+        local index = table.indexOf(bind, func)
+        table.remove(bind, index)
     end
 end
 return binding
