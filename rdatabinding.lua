@@ -216,6 +216,9 @@ function binding.bindable(init, parentkey, parent)
 end
 
 function binding.On(t, key, func)
+    if not key or not func then
+        return
+    end
     local firstAccessKey = string.match(key, "(%a*)%.")
     -- print(firstAccessKey)
     if firstAccessKey and type(t[firstAccessKey]) == "table" then
